@@ -1,0 +1,67 @@
+<nav id="sidebar">
+    <div class="sidebar-header">
+        <h4><i class="fas fa-cubes me-2"></i> Dabbirly</h4>
+    </div>
+
+    <ul class="list-unstyled components">
+        <li>
+            <a href="index.html"><i class="fas fa-home me-3 ms-2"></i> <span data-i18n="dashboard">لوحة
+                    القيادة</span></a>
+        </li>
+
+        <!-- Core Data -->
+        <li class="small text-uppercase text-white-50 px-4 mt-3 mb-1 fw-bold fs-7" data-i18n="core_data">البيانات
+            الأساسية
+        </li>
+
+        <li data-perm="view_users">
+            <a href="users.html"><i class="fas fa-users me-3 ms-2"></i> <span data-i18n="users">المستخدمين</span></a>
+        </li>
+        <li data-perm="view_providers">
+            <a href="providers.html"><i class="fas fa-hard-hat me-3 ms-2"></i> <span data-i18n="providers">مزودي
+                    الخدمة</span></a>
+        </li>
+
+        <!-- Services -->
+        <li data-perm="view_categories">
+            <a href="#servicesSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                <i class="fas fa-layer-group me-3 ms-2"></i> <span data-i18n="services_menu">الخدمات والنماذج</span>
+            </a>
+            <ul class="collapse list-unstyled pe-3" id="servicesSubmenu">
+                <li><a href="categories.html" data-i18n="categories">التصنيفات الرئيسية</a></li>
+                <li><a href="subcategories.html" data-i18n="sub_categories">التصنيفات الفرعية</a></li>
+                <li><a href="forms.html" data-i18n="forms">بناء النماذج</a></li>
+                <li><a href="car-data.html" data-i18n="car_data">بيانات السيارات</a></li>
+            </ul>
+        </li>
+
+        <!-- Operations -->
+        <li class="small text-uppercase text-white-50 px-4 mt-3 mb-1 fw-bold fs-7" data-i18n="operations">العمليات</li>
+
+        <li data-perm="view_requests">
+            <a href="#reqSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                <i class="fas fa-receipt me-3 ms-2"></i> <span data-i18n="requests">الطلبات</span>
+            </a>
+            <ul class="collapse list-unstyled pe-3" id="reqSubmenu">
+                <li><a href="requests.html" data-i18n="all">كل الطلبات</a></li>
+                <li><a href="cancelled-requests.html" data-i18n="cancelled_req">الملغاة</a></li>
+            </ul>
+        </li>
+
+        <li data-perm="manage_requests">
+            <a href="support-dashboard.html"><i class="fas fa-headset me-3 ms-2"></i> <span data-i18n="support">الدعم
+                    الفني</span></a>
+        </li>
+
+        <li data-perm="view_logs">
+            <a href="activity-logs.html"><i class="fas fa-history me-3 ms-2"></i> <span data-i18n="logs">سجل
+                    النظام</span></a>
+        </li>
+
+        <!-- Settings -->
+        <li data-perm="all">
+            <a href="locations.html"><i class="fas fa-map-marked-alt me-3 ms-2"></i> <span data-i18n="cities">المناطق
+                    والمدن</span></a>
+        </li>
+    </ul>
+</nav>

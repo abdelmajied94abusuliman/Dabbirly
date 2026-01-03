@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مزودي الخدمة - دبرلي</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="wrapper">
+        <div id="sidebar-container"></div>
+        <div id="content">
+            <div id="header-container"></div>
+            <div class="content-body">
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold" data-i18n="providers_title">مزودي الخدمة</h2>
+                    <a href="provider-create.html" class="btn btn-primary"><i class="fas fa-plus me-1"></i> <span
+                            data-i18n="create_provider_btn">تسجيل مزود</span></a>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3">
+                        <div class="card p-3 border-start border-4 border-primary">
+                            <div class="text-muted small" data-i18n="active_providers">مزودين نشطين</div>
+                            <h3 class="mb-0 fw-bold">1</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card p-3 border-start border-4 border-warning">
+                            <div class="text-muted small" data-i18n="pending_providers_stat">بانتظار الموافقة</div>
+                            <h3 class="mb-0 fw-bold">1</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <ul class="nav nav-tabs card-header-tabs" id="statusTabs">
+                            <li class="nav-item">
+                                <a class="nav-link active" onclick="filterProviders('all')" href="#"
+                                    data-i18n="all">الكل</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" onclick="filterProviders('pending')" href="#"
+                                    data-i18n="tab_pending">طلبات الانضمام</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" onclick="filterProviders('active')" href="#"
+                                    data-i18n="tab_active">النشطين</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th data-i18n="th_business_name">اسم النشاط</th>
+                                    <th data-i18n="th_category">التصنيف</th>
+                                    <th data-i18n="th_wallet">المحفظة</th>
+                                    <th data-i18n="th_subscription">الاشتراك</th>
+                                    <th data-i18n="th_approval">حالة الاعتماد</th>
+                                    <th data-i18n="th_activity">حالة النشاط</th>
+                                    <th data-i18n="actions"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="prov-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/mock-data.js"></script>
+    <script src="../js/main.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            renderTable('all');
+        });
+
+        function filterProviders(status) {
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+            renderTable(status);
+        }
+
+        function renderTable(filter) {
+            const tbody = document.getElementById("prov-body");
+            tbody.innerHTML = "";
+
+            mockApi.providers.forEach(p => {
+                if (filter === 'pending' && p.approval_status !== 'pending') return;
+                if (filter === 'active' && !p.is_active) return;
+
+                // Category Name
+                const cat = mockApi.categories.find(c => c.id === p.category_id);
+
+                // Approval Badge
+                let appBadge = '<span class="badge bg-success-subtle text-success">معتمد</span>';
+                if (p.approval_status === 'pending') appBadge = '<span class="badge bg-warning-subtle text-warning-emphasis">قيد المراجعة</span>';
+
+                // Activity Toggle
+                const toggle = p.is_active
+                    ? '<i class="fas fa-toggle-on text-success fa-lg"></i>'
+                    : '<i class="fas fa-toggle-off text-muted fa-lg"></i>';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>#${p.id}</td>
+                        <td class="fw-bold text-primary">${p.business_name}</td>
+                        <td>${cat ? cat.name_ar : '-'}</td>
+                        <td>${p.balance} ر.س</td>
+                        <td dir="ltr" class="small text-muted">${p.subscription_end_date || 'غير مشترك'}</td>
+                        <td>${appBadge}</td>
+                        <td>${toggle}</td>
+                        <td>
+                            <a href="provider-details.html?id=${p.id}" class="btn btn-sm btn-outline-primary">إدارة</a>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+    </script>
+</body>
+
+</html>

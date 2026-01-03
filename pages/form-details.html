@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تفاصيل النموذج - دبرلي</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css?v=1.1">
+</head>
+
+<body>
+    <div class="wrapper">
+        <div id="sidebar-container"></div>
+        <div id="content">
+            <div id="header-container"></div>
+            <div class="content-body">
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="fw-bold mb-1" id="form-title">...</h2>
+                        <span class="badge bg-secondary" id="form-type-badge">...</span>
+                    </div>
+                    <div>
+                        <a href="forms.html" class="btn btn-outline-secondary me-2">عودة للقائمة</a>
+                        <a href="#" id="edit-btn" class="btn btn-primary"><i class="fas fa-edit me-2"></i> تعديل
+                            النموذج</a>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Preview Card -->
+                    <div class="col-md-8 mx-auto">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="mb-0 fw-bold"><i class="fas fa-eye text-primary me-2"></i> معاينة النموذج
+                                    (Live Preview)</h5>
+                            </div>
+                            <div class="card-body p-4 bg-light">
+                                <form id="form-preview" onsubmit="return false;">
+                                    <!-- Fields will be injected here -->
+                                </form>
+                            </div>
+                            <div class="card-footer bg-white text-muted small text-center">
+                                هذا النموذج هو كيف سيظهر للمستخدم النهائي في التطبيق
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Metadata / Tech Details -->
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-header bg-white fw-bold">بيانات تقنية</div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span class="text-muted">المعرف (ID)</span>
+                                        <span class="fw-bold font-monospace" id="meta-id">...</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span class="text-muted">عدد الحقول</span>
+                                        <span class="fw-bold" id="meta-count">...</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span class="text-muted">تاريخ الإنشاء</span>
+                                        <span class="fw-bold">2026-01-01</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header bg-white fw-bold">حقول النموذج (Schema)</div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                                    <table class="table table-sm table-striped mb-0 small">
+                                        <thead>
+                                            <tr>
+                                                <th>Label</th>
+                                                <th>Type</th>
+                                                <th>Req?</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="schema-table"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/mock-data.js"></script>
+    <script src="../js/main.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const id = parseInt(new URLSearchParams(window.location.search).get('id'));
+            const form = mockApi.forms.find(f => f.id === id);
+
+            if (!form) {
+                document.querySelector('.content-body').innerHTML = '<div class="alert alert-danger">النموذج غير موجود</div>';
+                return;
+            }
+
+            // Bind Header
+            document.getElementById('form-title').innerText = form.name;
+            document.getElementById('form-type-badge').innerText = form.type;
+            document.getElementById('edit-btn').href = `form-builder.html?id=${form.id}`;
+
+            // Bind Meta
+            document.getElementById('meta-id').innerText = form.id;
+            document.getElementById('meta-count').innerText = form.fields.length;
+
+            // Bind Schema Table
+            const schemaBody = document.getElementById('schema-table');
+            form.fields.forEach(f => {
+                schemaBody.innerHTML += `
+                    <tr>
+                        <td>${f.label_ar}</td>
+                        <td><code>${f.type}</code></td>
+                        <td>${f.required ? '<i class="fas fa-check text-success"></i>' : '-'}</td>
+                    </tr>
+                `;
+            });
+
+            // Render Preview
+            const container = document.getElementById('form-preview');
+            form.fields.forEach(field => {
+                let inputHtml = '';
+                const reqAttr = field.required ? 'required' : '';
+                const reqStar = field.required ? '<span class="text-danger">*</span>' : '';
+
+                if (field.type === 'text') {
+                    inputHtml = `<input type="text" class="form-control" ${reqAttr}>`;
+                } else if (field.type === 'textarea') {
+                    inputHtml = `<textarea class="form-control" rows="3" ${reqAttr}></textarea>`;
+                } else if (field.type === 'number') {
+                    inputHtml = `<input type="number" class="form-control" ${reqAttr}>`;
+                } else if (field.type === 'select') {
+                    const opts = field.options.map(o => `<option>${o}</option>`).join('');
+                    inputHtml = `<select class="form-select" ${reqAttr}><option value="">اختر...</option>${opts}</select>`;
+                } else if (field.type === 'radio') {
+                    inputHtml = field.options.map((o, i) => `
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="${field.name}" id="${field.name}_${i}">
+                            <label class="form-check-label" for="${field.name}_${i}">${o}</label>
+                        </div>
+                    `).join('');
+                } else if (field.type === 'checkbox') {
+                    // Checkbox can be single (boolean) or multiple. 
+                    // Logic in builder implies multiple options if provided, or single if no options?
+                    // Let's assume schema options provided = multiple choice checklist, else single toggle.
+                    if (field.options && field.options.length > 0) {
+                        inputHtml = field.options.map((o, i) => `
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="${field.name}" id="${field.name}_${i}">
+                                <label class="form-check-label" for="${field.name}_${i}">${o}</label>
+                            </div>
+                        `).join('');
+                    } else {
+                        inputHtml = `
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="${field.name}">
+                                <label class="form-check-label" for="${field.name}">تفعيل</label>
+                            </div>
+                         `;
+                    }
+                } else if (field.type === 'date') {
+                    inputHtml = `<input type="date" class="form-control" ${reqAttr}>`;
+                } else if (field.type === 'file' || field.type === 'image') {
+                    inputHtml = `<input type="file" class="form-control" ${reqAttr}>`;
+                } else if (field.type === 'car_selector') {
+                    inputHtml = `
+                        <div class="row g-2">
+                            <div class="col-6"><select class="form-select"><option>ماركة السيارة</option></select></div>
+                            <div class="col-6"><select class="form-select"><option>الموديل</option></select></div>
+                        </div>
+                    `;
+                } else if (field.type === 'location') {
+                    inputHtml = `
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                            <input type="text" class="form-control" placeholder="تحديد الموقع على الخريطة" readonly>
+                            <button class="btn btn-outline-secondary" type="button">بحث</button>
+                        </div>
+                     `;
+                }
+
+                container.innerHTML += `
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">${field.label_ar} ${reqStar}</label>
+                        ${inputHtml}
+                        <div class="form-text text-muted" style="font-size: 0.7rem">System Name: <code>${field.name}</code></div>
+                    </div>
+                `;
+            });
+
+            // Add submit button mock
+            container.innerHTML += `
+                <div class="mt-4 pt-3 border-top">
+                    <button class="btn btn-primary w-100" disabled>إرسال الطلب (معاينة)</button>
+                </div>
+            `;
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تفاصيل المزود - دبرلي</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="wrapper">
+        <div id="sidebar-container"></div>
+        <div id="content">
+            <div id="header-container"></div>
+            <div class="content-body">
+
+                <div class="mb-4">
+                    <a href="providers.html" class="text-decoration-none text-muted"><i
+                            class="fas fa-arrow-right me-1"></i> العودة للقائمة</a>
+                </div>
+
+                <!-- Header Info -->
+                <div class="row align-items-center mb-4">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-primary text-white rounded p-3">
+                                <i class="fas fa-store fa-2x"></i>
+                            </div>
+                            <div>
+                                <h3 class="fw-bold mb-0" id="biz-name">Loading...</h3>
+                                <div class="text-muted" id="biz-cat">Loading...</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div id="approval-actions" class="d-none">
+                            <button class="btn btn-success" onclick="approve(currentId)"><i
+                                    class="fas fa-check me-2"></i> اعتماد المزود</button>
+                            <button class="btn btn-danger"><i class="fas fa-times me-2"></i> رفض</button>
+                        </div>
+                        <div id="active-actions" class="d-none">
+                            <button class="btn btn-outline-danger">إيقاف مؤقت للحساب</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Tabs -->
+                <div class="row g-4">
+                    <!-- Left Column -->
+                    <div class="col-md-4">
+                        <!-- Status Card -->
+                        <div class="card mb-4">
+                            <div class="card-header">حالة الحساب</div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>الاعتماد:</span>
+                                    <span id="label-approved"></span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>النشاط:</span>
+                                    <span id="label-active"></span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span>نهاية الاشتراك:</span>
+                                    <strong id="sub-date" class="text-dark"></strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Documents -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span>المستندات</span>
+                                <span class="badge bg-secondary">2</span>
+                            </div>
+                            <div class="list-group list-group-flush" id="docs-list">
+                                <!-- JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="col-md-8">
+                        <div class="card h-100">
+                            <div class="card-header bg-white">
+                                <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                                    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab"
+                                            href="#services">الخدمات</a></li>
+                                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab"
+                                            href="#agents">الموظفين (Agents)</a></li>
+                                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#works">الأعمال
+                                            السابقة</a></li>
+                                </ul>
+                            </div>
+                            <div class="card-body">
+                                <div class="tab-content">
+                                    <!-- Services Tab -->
+                                    <div class="tab-pane fade show active" id="services">
+                                        <h6 class="text-primary mb-3">الخدمات الفرعية المسجلة</h6>
+                                        <div class="d-flex flex-wrap gap-2 mb-4" id="subcats-tags"></div>
+
+                                        <h6 class="text-primary mb-3">مناطق التغطية</h6>
+                                        <div class="d-flex flex-wrap gap-2" id="cities-tags"></div>
+                                    </div>
+
+                                    <!-- Agents Tab -->
+                                    <div class="tab-pane fade" id="agents">
+                                        <div class="d-flex justify-content-between mb-3">
+                                            <span>موظفين تابعين لهذا الحساب</span>
+                                            <button class="btn btn-sm btn-outline-primary">إضافة موظف</button>
+                                        </div>
+                                        <table class="table table-sm">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>الاسم</th>
+                                                    <th>الدور</th>
+                                                    <th>الجوال</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="agents-body"></tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- Works Tab -->
+                                    <div class="tab-pane fade" id="works">
+                                        <div class="row g-3" id="works-grid"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/mock-data.js"></script>
+    <script src="../js/main.js"></script>
+    <script>
+        let currentId = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            currentId = parseInt(getUrlParam('id'));
+            const p = mockApi.providers.find(x => x.id === currentId);
+            if (!p) return;
+
+            // Header
+            document.getElementById("biz-name").innerText = p.business_name;
+            const cat = mockApi.categories.find(c => c.id === p.category_id);
+            document.getElementById("biz-cat").innerText = cat ? cat.name_ar : '-';
+
+            // Actions
+            if (p.approval_status === "pending") document.getElementById("approval-actions").classList.remove("d-none");
+            else document.getElementById("active-actions").classList.remove("d-none");
+
+            // Status Labels
+            document.getElementById("label-approved").innerHTML = p.approval_status === 'approved'
+                ? '<span class="text-success"><i class="fas fa-check-circle"></i> معتمد</span>'
+                : '<span class="text-warning"><i class="fas fa-clock"></i> قيد المراجعة</span>';
+
+            document.getElementById("label-active").innerHTML = p.is_active
+                ? '<span class="badge bg-success">نشط</span>'
+                : '<span class="badge bg-secondary">متوقف</span>';
+
+            document.getElementById("sub-date").innerText = p.subscription_end_date || "غير مشترك";
+
+            // Docs
+            const docsList = document.getElementById("docs-list");
+            p.documents.forEach(d => {
+                docsList.innerHTML += `
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-file-pdf text-danger me-2"></i> ${d.type}
+                            <div class="small text-muted">${d.file}</div>
+                        </div>
+                        <span class="badge bg-light text-dark">${d.status}</span>
+                    </div>
+                `;
+            });
+
+            // Services
+            const subTags = document.getElementById("subcats-tags");
+            p.sub_categories.forEach(sid => {
+                const sub = mockApi.sub_categories.find(s => s.id === sid);
+                if (sub) subTags.innerHTML += `<span class="badge bg-primary-subtle text-primary border border-primary-subtle p-2">${sub.name_ar}</span>`;
+            });
+
+            // Cities
+            const cityTags = document.getElementById("cities-tags");
+            p.locations.forEach(cid => {
+                const city = mockApi.cities.find(c => c.id === cid);
+                if (city) cityTags.innerHTML += `<span class="badge bg-light text-dark border p-2">${city.name_ar}</span>`;
+            });
+
+            // Agents
+            const agentBody = document.getElementById("agents-body");
+            if (p.agents.length === 0) agentBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">لا يوجد موظفين</td></tr>';
+            p.agents.forEach(a => {
+                agentBody.innerHTML += `<tr><td>${a.name}</td><td>${a.role}</td><td>${a.mobile}</td></tr>`;
+            });
+
+            // Previous Works
+            const workGrid = document.getElementById("works-grid");
+            if (p.previous_works.length === 0) workGrid.innerHTML = '<div class="col-12 text-center text-muted">لا توجد أعمال سابقة</div>';
+            p.previous_works.forEach(w => {
+                workGrid.innerHTML += `
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 120px;">
+                                <i class="fas fa-image fa-2x text-muted"></i>
+                            </div>
+                            <div class="card-body p-2 text-center">
+                                <small>${w.title}</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+
+        function approve(id) {
+            if (confirm("اعتماد الحساب وتفعيل الاشتراك؟")) {
+                alert("تم الاعتماد بنجاح");
+                // update logic simulated
+                location.reload();
+            }
+        }
+    </script>
+</body>
+
+</html>

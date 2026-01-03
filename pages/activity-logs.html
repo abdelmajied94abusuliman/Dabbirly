@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سجل النشاطات - دبرلي</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="wrapper">
+        <div id="sidebar-container"></div>
+        <div id="content">
+            <div id="header-container"></div>
+            <div class="content-body">
+                <h2 class="fw-bold mb-4" data-i18n="logs_title">سجل نشاطات النظام</h2>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-0">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th data-i18n="th_id">ID</th>
+                                    <th data-i18n="th_actor">المسؤول (Actor)</th>
+                                    <th data-i18n="th_action">الإجراء</th>
+                                    <th data-i18n="th_target">الهدف (Target)</th>
+                                    <th data-i18n="th_date">التاريخ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logs-body">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/mock-data.js"></script>
+    <script src="../js/main.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const tbody = document.getElementById("logs-body");
+            mockApi.audit_logs.forEach(log => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="text-muted">#${log.id}</td>
+                        <td class="fw-bold">${log.actor_name}</td>
+                        <td><span class="badge bg-light text-dark border">${log.action}</span></td>
+                        <td>${log.target_entity} ${log.target_id || ''}</td>
+                        <td dir="ltr" class="text-end small text-muted">${log.date}</td>
+                    </tr>
+                `;
+            });
+        });
+    </script>
+</body>
+
+</html>

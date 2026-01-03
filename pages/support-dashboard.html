@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الدعم الفني - دبرلي</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css?v=1.1">
+</head>
+
+<body>
+    <div class="wrapper">
+        <div id="sidebar-container"></div>
+        <div id="content">
+            <div id="header-container"></div>
+            <div class="content-body">
+
+                <h2 class="fw-bold mb-4" data-i18n="support_dashboard">لوحة عمليات الدعم</h2>
+
+                <!-- Stats Overview -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <div class="card p-3 border-0 shadow-sm text-center">
+                            <h6 class="text-muted" data-i18n="active_reqs">طلبات نشطة</h6>
+                            <h3 class="fw-bold text-primary">15</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card p-3 border-0 shadow-sm text-center">
+                            <h6 class="text-muted" data-i18n="needs_approval">بحاجة لتعميد</h6>
+                            <h3 class="fw-bold text-danger">3</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card p-3 border-0 shadow-sm text-center">
+                            <h6 class="text-muted" data-i18n="connected_providers">مزودين متصلين</h6>
+                            <h3 class="fw-bold text-success">8</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card p-3 border-0 shadow-sm text-center">
+                            <h6 class="text-muted" data-i18n="response_time">وقت الاستجابة</h6>
+                            <h3 class="fw-bold text-info">5 د</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Requests with Provider Info -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white fw-bold" data-i18n="ongoing_requests">الطلبات الجارية والتواصل
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th data-i18n="req_num">رقم الطلب</th>
+                                        <th data-i18n="user">العميل</th>
+                                        <th data-i18n="provider_assigned">المزود المخصص</th>
+                                        <th data-i18n="contact_info">بيانات التواصل (مزود)</th>
+                                        <th data-i18n="status">الحالة</th>
+                                        <th data-i18n="th_actions">إجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>#2004</td>
+                                        <td>
+                                            <div class="fw-bold">سارة خالد</div>
+                                            <div class="small text-muted">0555987654</div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold">مركز الصيانة السريع</div>
+                                            <span class="badge bg-light text-dark border">ميكانيكا</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <a href="tel:0500111222"
+                                                    class="btn btn-sm btn-outline-success rounded-circle"
+                                                    title="اتصال"><i class="fas fa-phone"></i></a>
+                                                <a href="https://wa.me/966500111222" target="_blank"
+                                                    class="btn btn-sm btn-outline-success rounded-circle"
+                                                    title="واتساب"><i class="fab fa-whatsapp"></i></a>
+                                                <div>
+                                                    <div class="fw-bold small">علي حسن</div>
+                                                    <div class="small text-muted">0500111222</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-status-active">جاري العمل</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary">التفاصيل</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>#2005</td>
+                                        <td>
+                                            <div class="fw-bold">عبدالله العتيبي</div>
+                                            <div class="small text-muted">0505123456</div>
+                                        </td>
+                                        <td>
+                                            <span class="text-muted fst-italic">-- بانتظار العروض --</span>
+                                        </td>
+                                        <td>
+                                            <span class="text-muted small">-</span>
+                                        </td>
+                                        <td><span class="badge bg-status-pending">معلق</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary">التفاصيل</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/mock-data.js"></script>
+    <script src="../js/main.js"></script>
+</body>
+
+</html>

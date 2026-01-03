@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إضافة مزود جديد - دبرلي</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="wrapper">
+        <div id="sidebar-container"></div>
+        <div id="content">
+            <div id="header-container"></div>
+            <div class="content-body">
+
+                <div class="mb-4">
+                    <a href="providers.html" class="text-decoration-none text-secondary"><i
+                            class="fas fa-arrow-right me-1"></i> العودة للقائمة</a>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold">تسجيل مزود خدمة جديد (يدوي)</h2>
+                </div>
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <form onsubmit="handleCreateProvider(event)">
+                            <h5 class="mb-3 text-primary">بيانات الحساب والنشاط</h5>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">الاسم التجاري <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" required
+                                        placeholder="مثال: ورشة الفني المحترف">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">رقم السجل التجاري</label>
+                                    <input type="text" class="form-control" placeholder="1010xxxxxx">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">رقم الجوال (للدخول)</label>
+                                    <input type="tel" class="form-control" placeholder="05xxxxxxxx">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">البريد الإلكتروني</label>
+                                    <input type="email" class="form-control" placeholder="email@example.com">
+                                </div>
+                            </div>
+
+                            <h5 class="mb-3 text-primary">التصنيف والمستندات</h5>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">التصنيف الرئيسي</label>
+                                    <select class="form-select">
+                                        <option>صيانة سيارات</option>
+                                        <option>نقل وسحب</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">صورة السجل التجاري</label>
+                                    <input type="file" class="form-control">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">ملاحظات إدارية</label>
+                                    <textarea class="form-control" rows="2"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-light border"
+                                    onclick="window.history.back()">إلغاء</button>
+                                <button type="submit" class="btn btn-primary px-4 fw-bold">تسجيل المزود</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/mock-data.js"></script>
+    <script src="../js/main.js"></script>
+    <script>
+        function handleCreateProvider(e) {
+            e.preventDefault();
+            // In a real app, form data gathering goes here
+            alert("تم تسجيل المزود بنجاح! سيتم توجيهك لصفحة التفاصيل لإكمال الإعدادات (المواقع، الموظفين).");
+            window.location.href = "providers.html"; // Redirect to list
+        }
+    </script>
+</body>
+
+</html>

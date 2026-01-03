@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الخدمات الفرعية - دبرلي</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="wrapper">
+        <div id="sidebar-container"></div>
+        <div id="content">
+            <div id="header-container"></div>
+            <div class="content-body">
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold" data-i18n="subcategories_title">الخدمات الفرعية</h2>
+                    <button class="btn btn-primary"><i class="fas fa-plus me-1"></i> <span data-i18n="new_service">خدمة
+                            جديدة</span></button>
+                </div>
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-0">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th data-i18n="th_id">ID</th>
+                                    <th data-i18n="service_name">الخدمة</th>
+                                    <th data-i18n="main_category">التصنيف الرئيسي</th>
+                                    <th data-i18n="linked_forms">النماذج المرتبطة</th>
+                                    <th data-i18n="acceptance_score">نسبة القبول</th>
+                                    <th data-i18n="matching_factors">عوامل المطابقة</th>
+                                    <th data-i18n="th_actions">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="subcategories-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/mock-data.js"></script>
+    <script src="../js/main.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const tbody = document.getElementById("subcategories-body");
+            mockApi.sub_categories.forEach(sub => {
+                const parent = mockApi.categories.find(c => c.id === sub.category_id);
+                const userForm = mockApi.forms.find(f => f.id === sub.form_id);
+                const provForm = mockApi.forms.find(f => f.id === sub.provider_form_id);
+
+                const factors = sub.matching_factors.map(f => `<span class="badge bg-light text-dark border small me-1">${f}</span>`).join('');
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${sub.id}</td>
+                        <td class="fw-bold text-dark">${sub.name_ar}</td>
+                        <td>${parent ? parent.name_ar : '-'}</td>
+                        <td>
+                            <div class="small mb-1"><i class="fas fa-user-tag text-muted w-20"></i> ${userForm ? userForm.name : '---'}</div>
+                            <div class="small"><i class="fas fa-store text-muted w-20"></i> ${provForm ? provForm.name : '---'}</div>
+                        </td>
+                        <td><span class="fw-bold text-primary">${sub.acceptance_score}%</span></td>
+                        <td>${factors}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-cog"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        });
+    </script>
+</body>
+
+</html>
