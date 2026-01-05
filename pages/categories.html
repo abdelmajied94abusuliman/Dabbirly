@@ -33,7 +33,6 @@
                                         <th data-i18n="th_image">الصورة</th>
                                         <th data-i18n="th_name_ar">الاسم (عربي)</th>
                                         <th data-i18n="th_name_en">الاسم (إنجليزي)</th>
-                                        <th data-i18n="th_active">الحالة</th>
                                         <th data-i18n="th_actions">الإجراءات</th>
                                     </tr>
                                 </thead>
@@ -51,24 +50,46 @@
     <script src="../js/mock-data.js"></script>
     <script src="../js/main.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", async function () {
             const tbody = document.getElementById("cat-body");
-            mockApi.categories.forEach(cat => {
-                const badge = cat.is_active
-                    ? '<span class="badge bg-status-active">نشط</span>'
-                    : '<span class="badge bg-status-inactive">غير نشط</span>';
 
+            const userSession = JSON.parse(sessionStorage.getItem("db_user"));
+            if (!userSession) return console.error("No user session found");
+            const baseURL = 'https://dabbirly.com';
+
+            let data = null;
+
+            try {
+                const response = await fetch(`${baseURL}/api/dashboard/v1/categories`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${userSession.token}` // Corrected
+                    },
+                });
+
+                data = await response.json();
+
+                if (!response.ok) {
+                    console.error("Failed to fetch users:", response.status, response.statusText);
+                }
+            } catch (error) {
+                console.error("Error fetching users:", error);
+            }
+
+            tbody.innerHTML = "";
+            data.data.forEach(cat => {
                 tbody.innerHTML += `
                     <tr>
                         <td>${cat.id}</td>
                         <td>
                             <div class="bg-light rounded d-flex align-items-center justify-content-center border" style="width: 40px; height: 40px;">
-                                <i class="fas fa-image text-muted"></i>
+                                <img src="${cat.image}" style="width: 40px; height: 40px;"/>
                             </div>
                         </td>
-                        <td class="fw-bold text-primary">${cat.name_ar}</td>
-                        <td class="text-muted">${cat.name_en}</td>
-                        <td>${badge}</td>
+                        <td class="fw-bold text-primary">${cat.type_ar}</td>
+                        <td class="text-muted">${cat.type}</td>
                         <td>
                             <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i></button>
                             <button class="btn btn-sm btn-link text-danger"><i class="fas fa-trash-alt"></i></button>

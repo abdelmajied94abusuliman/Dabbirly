@@ -137,7 +137,6 @@ async function loadLayout() {
 
     try {
         const basePath = getBasePath();
-        console.log("Base Path:", basePath);
 
         // Load Sidebar
         const sidebarRes = await fetch(`${basePath}/layouts/sidebar.html`);
@@ -211,7 +210,7 @@ async function loadLayout() {
         }, 500); // Quick check then hide
 
     } catch (error) {
-        console.error("Layout loading failed:", error);
+        console.error("Layout loading failed:");
     }
 }
 

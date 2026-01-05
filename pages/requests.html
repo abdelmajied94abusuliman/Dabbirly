@@ -92,15 +92,40 @@
             renderList();
         }
 
-        function renderList() {
+        async function renderList() {
             const tbody = document.getElementById("req-body");
             tbody.innerHTML = "";
 
-            mockApi.requests.forEach(r => {
-                if (currentFilter !== 'all' && r.status !== currentFilter) return;
+            const baseURL = 'https://dabbirly.com';
 
-                const user = mockApi.users.find(u => u.id === r.user_id);
-                const sub = mockApi.sub_categories.find(s => s.id === r.sub_category_id);
+            const userSession = JSON.parse(sessionStorage.getItem("db_user"));
+            if (!userSession) return console.error("No user session found");
+
+            const nexCursor = null;
+            let data = null;
+
+            try {
+                const response = await fetch(`${baseURL}/api/dashboard/v1/get-requests?next_cursor=${nexCursor}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${userSession.token}` // Corrected
+                    },
+                });
+
+                data = await response.json(); // Parse JSON
+
+                if (!response.ok) {
+                    console.error("Failed to fetch users:", response.status, response.statusText);
+                    return;
+                }
+            } catch (error) {
+                console.error("Failed to fetch users:", error);
+            }
+
+            data.requests.forEach(r => {
+                if (currentFilter !== 'all' && r.status !== currentFilter) return;
 
                 // Status Badge logic
                 let badge = `<span class="badge bg-secondary">${r.status}</span>`;
@@ -113,8 +138,8 @@
                 tbody.innerHTML += `
                     <tr>
                         <td class="fw-bold text-primary">#${r.id}</td>
-                        <td>${user ? user.name : 'Unknown'}</td>
-                        <td>${sub ? sub.name_ar : '---'}</td>
+                        <td>${r.user ? r.user.first_name + '' + r.user.last_name : 'Unknown'}</td>
+                        <td>${r.sub_category ? r.sub_category.name_ar : '---'}</td>
                         <td>${badge}</td>
                         <td dir="ltr" class="small text-muted">${r.created_at}</td>
                         <td>

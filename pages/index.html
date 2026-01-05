@@ -181,25 +181,65 @@
     <script src="../js/mock-data.js"></script>
     <script src="../js/main.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", async function () {
             // Check auth first
             checkAuth();
 
+            const userSession = JSON.parse(sessionStorage.getItem("db_user"));
+            if (!userSession) return console.error("No user session found");
+            const baseURL = 'https://dabbirly.com';
+
+            let data = null;
+
+            try {
+                const response = await fetch(`${baseURL}/api/dashboard/v1/statistics`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${userSession.token}` // Corrected
+                    },
+                });
+
+                data = await response.json();
+
+                if (!response.ok) {
+                    console.error("Failed to fetch users:", response.status, response.statusText);
+                }
+            } catch (error) {
+                console.error("Error fetching users:", error);
+            }
+
             // Populate Stats
-            document.getElementById("stat-users").innerText = mockApi.users.length;
-            document.getElementById("stat-providers").innerText = mockApi.providers.filter(p => p.is_active === 1).length;
-            document.getElementById("stat-requests").innerText = mockApi.requests.filter(r => ['pending', 'offered'].includes(r.status)).length;
-            document.getElementById("stat-unanswered").innerText = mockApi.requests.filter(r => r.status === 'pending' && r.offers_count === 0).length;
+            document.getElementById("stat-users").innerText = data.users_counts ?? 0;
+            document.getElementById("stat-providers").innerText = data.verified_providers_counts ?? 0;
+            document.getElementById("stat-requests").innerText = data.offered_requests_counts ?? 0;
+            document.getElementById("stat-unanswered").innerText = data.pending_requests_counts ?? 0;
 
             // Populate Recent Requests
             const tableBody = document.getElementById("recent-requests-table");
-            const recent = mockApi.requests.slice(0, 5); // take first 5
+            let requests = null;
 
-            recent.forEach(req => {
-                const user = mockApi.users.find(u => u.id === req.user_id);
-                const subcat = mockApi.sub_categories.find(s => s.id === req.sub_category_id);
+            try {
+                const response = await fetch(`${baseURL}/api/dashboard/v1/get-requests?recent=5`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${userSession.token}` // Corrected
+                    },
+                });
 
+                requests = await response.json();
 
+                if (!response.ok) {
+                    console.error("Failed to fetch users:", response.status, response.statusText);
+                }
+            } catch (error) {
+                console.error("Error fetching users:", error);
+            }
+
+            requests.forEach(req => {
                 let badgeClass = 'bg-secondary';
                 if (req.status === 'pending') badgeClass = 'bg-warning text-dark';
                 if (req.status === 'offered') badgeClass = 'bg-info text-white';
@@ -207,8 +247,8 @@
                 const row = `
                     <tr>
                         <td>#${req.id}</td>
-                        <td>${user ? user.name : 'Unknown'}</td>
-<td>${subcat?.name_ar || 'غير معروف'}</td>
+                        <td>${req.user.first_name ? req.user.first_name : 'Unknown'} ${req.user.last_name ? req.user.last_name : 'Unknown'}</td>
+                        <td>${req.sub_category.name_ar || 'غير معروف'}</td>
                         <td><span class="badge ${badgeClass}">${req.status}</span></td>
                         <td>${req.created_at}</td>
                     </tr>
