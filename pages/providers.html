@@ -61,8 +61,8 @@
                                 <tr>
                                     <th>ID</th>
                                     <th data-i18n="th_business_name">اسم النشاط</th>
+                                    <th data-i18n="th_owner_name">اسم العميل</th>
                                     <th data-i18n="th_category">التصنيف</th>
-                                    <th data-i18n="th_wallet">المحفظة</th>
                                     <th data-i18n="th_subscription">الاشتراك</th>
                                     <th data-i18n="th_approval">حالة الاعتماد</th>
                                     <th data-i18n="th_activity">حالة النشاط</th>
@@ -92,16 +92,49 @@
             renderTable(status);
         }
 
-        function renderTable(filter) {
+        async function renderTable(filter) {
             const tbody = document.getElementById("prov-body");
             tbody.innerHTML = "";
 
-            mockApi.providers.forEach(p => {
+            const baseURL = 'https://dabbirly.com';
+
+            const userSession = JSON.parse(sessionStorage.getItem("db_user"));
+            if (!userSession) {
+                console.error("No user session found");
+                return;
+            }
+
+            let data = null;
+
+            try {
+                const response = await fetch(
+                    `${baseURL}/api/dashboard/v1/all-providers`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'Authorization': `Bearer ${userSession.token}`
+                        },
+                    }
+                );
+
+                data = await response.json();
+                console.log(data.providers);
+
+                if (!response.ok) {
+                    console.error("Failed to fetch cancelled requests", data);
+                    return;
+                }
+
+            } catch (error) {
+                console.error("Request error:", error);
+                return;
+            }
+
+            data.providers.forEach(p => {
                 if (filter === 'pending' && p.approval_status !== 'pending') return;
                 if (filter === 'active' && !p.is_active) return;
-
-                // Category Name
-                const cat = mockApi.categories.find(c => c.id === p.category_id);
 
                 // Approval Badge
                 let appBadge = '<span class="badge bg-success-subtle text-success">معتمد</span>';
@@ -116,8 +149,8 @@
                     <tr>
                         <td>#${p.id}</td>
                         <td class="fw-bold text-primary">${p.business_name}</td>
-                        <td>${cat ? cat.name_ar : '-'}</td>
-                        <td>${p.balance} ر.س</td>
+                        <td>${p.owner[0].first_name} ${p.owner[0].last_name}</td>
+                        <td>${p.category.type_ar}</td>
                         <td dir="ltr" class="small text-muted">${p.subscription_end_date || 'غير مشترك'}</td>
                         <td>${appBadge}</td>
                         <td>${toggle}</td>
