@@ -24,18 +24,12 @@
                                 <tr>
                                     <th data-i18n="req_num">رقم الطلب</th>
                                     <th data-i18n="user">العميل</th>
+                                    <th data-i18n="mobile">رقم الهاتف</th>
                                     <th data-i18n="th_cancel_reason">سبب الإلغاء</th>
                                     <th data-i18n="th_cancel_date">تاريخ الإلغاء</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <td>#4092</td>
-                                    <td>خالد يوسف</td>
-                                    <td><span class="text-danger">تأخر الرد من المزودين</span></td>
-                                    <td>2026-01-01</td>
-                                </tr>
-                            </tbody>
+                            <tbody id="cancelled-body"></tbody>
                         </table>
                     </div>
                 </div>
@@ -45,6 +39,73 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/mock-data.js"></script>
     <script src="../js/main.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            renderCancelledRequests();
+        });
+
+        async function renderCancelledRequests() {
+            const tbody = document.getElementById("cancelled-body");
+            tbody.innerHTML = "";
+
+            const baseURL = 'https://dabbirly.com';
+
+            const userSession = JSON.parse(sessionStorage.getItem("db_user"));
+            if (!userSession) {
+                console.error("No user session found");
+                return;
+            }
+
+            let data = null;
+
+            try {
+                const response = await fetch(
+                    `${baseURL}/api/dashboard/v1/get-cancelled-requests`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'Authorization': `Bearer ${userSession.token}`
+                        },
+                    }
+                );
+
+                data = await response.json();
+                console.log(data);
+
+                if (!response.ok) {
+                    console.error("Failed to fetch cancelled requests", data);
+                    return;
+                }
+
+            } catch (error) {
+                console.error("Request error:", error);
+                return;
+            }
+
+            data.requests.forEach(r => {
+                tbody.innerHTML += `
+                <tr>
+                    <td class="fw-bold text-primary">#${r.id}</td>
+                    <td>${r.user.first_name + ' ' + r.user.last_name}</td>
+                    <td>${r.user.mobile}</td>
+                    <td>
+                        <span class="text-danger">
+                            ${r.reason_of_cancelled ?? '---'}
+                        </span>
+                    </td>
+                    <td class="small text-muted">
+                        ${r.created_at}
+                    </td>
+                </tr>
+            `;
+            });
+
+            // Re-apply translations for dynamic content
+            applyLang();
+        }
+    </script>
 </body>
 
 </html>
