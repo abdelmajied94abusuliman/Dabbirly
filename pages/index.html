@@ -386,6 +386,9 @@
                     }
                 }
             });
+
+            // Hide loader after all data and charts are loaded
+            if (window.hideLoader) window.hideLoader();
         });
     </script>
 </body>

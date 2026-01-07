@@ -104,6 +104,25 @@ function filterTable(tableId, query) {
 // ==========================================
 // 3. UI Helpers
 // ==========================================
+// Global Loader Helpers
+window.showLoader = function () {
+    let loader = document.getElementById('global-loader');
+    if (!loader) {
+        loader = document.createElement('div');
+        loader.id = 'global-loader';
+        loader.innerHTML = '<div class="loader-spinner"></div>';
+        document.body.prepend(loader);
+    }
+    loader.classList.remove('hidden');
+};
+
+window.hideLoader = function () {
+    const loader = document.getElementById('global-loader');
+    if (loader) {
+        loader.classList.add('hidden');
+    }
+};
+
 function getBasePath() {
     // إذا الصفحة داخل /pages
     if (window.location.pathname.includes("/pages/")) {
@@ -125,13 +144,19 @@ async function loadLayout() {
         document.body.prepend(loader);
     }
 
+    // Helper function to hide loader
+    const hideLoader = () => {
+        const l = document.getElementById('global-loader');
+        if (l) l.classList.add('hidden');
+    };
+
+    // Fallback timeout - force hide after 3 seconds
+    const fallbackTimeout = setTimeout(hideLoader, 3000);
+
     // Login page handling
     if (isLogin) {
-        // Just hide loader after a short delay for smoothness
-        setTimeout(() => {
-            const l = document.getElementById('global-loader');
-            if (l) l.classList.add('hidden');
-        }, 500);
+        setTimeout(hideLoader, 300);
+        clearTimeout(fallbackTimeout);
         return;
     }
 
@@ -203,14 +228,15 @@ async function loadLayout() {
         const contentBody = document.querySelector('.content-body');
         if (contentBody) contentBody.classList.add('animate-fade-in');
 
-        // Hide Loader
-        setTimeout(() => {
-            const l = document.getElementById('global-loader');
-            if (l) l.classList.add('hidden');
-        }, 500); // Quick check then hide
+        // Hide Loader - NOW after everything is loaded
+        clearTimeout(fallbackTimeout);
+        setTimeout(hideLoader, 200);
 
     } catch (error) {
         console.error("Layout loading failed: ", error);
+        // Hide loader even on error
+        clearTimeout(fallbackTimeout);
+        hideLoader();
     }
 }
 

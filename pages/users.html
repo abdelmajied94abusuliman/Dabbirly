@@ -124,8 +124,13 @@
             `;
                 });
 
+                // Hide loader after data is loaded
+                if (window.hideLoader) window.hideLoader();
+
             } catch (error) {
                 console.error("Error fetching users:", error);
+                // Hide loader even on error
+                if (window.hideLoader) window.hideLoader();
             }
         });
     </script>
