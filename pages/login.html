@@ -24,24 +24,12 @@
 
         <form id="loginForm" onsubmit="handleLogin(event)">
             <div class="form-floating mb-3">
-                <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com"
-                    value="admin@dabbirly.com">
-                <label for="floatingInput">البريد الإلكتروني</label>
+                <input type="text" class="form-control" id="mobile" placeholder="name@example.com" value="0797193116">
+                <label for="mobile">رقم الهاتف</label>
             </div>
             <div class="form-floating mb-4">
-                <input type="password" class="form-control" id="floatingPassword" placeholder="Password"
-                    value="password">
-                <label for="floatingPassword">كلمة المرور</label>
-            </div>
-
-            <!-- Role Simulator -->
-            <div class="mb-4">
-                <label class="form-label small text-muted text-uppercase fw-bold">اختر نوع الحساب (محاكاة)</label>
-                <select class="form-select py-2" id="roleSelect">
-                    <option value="super_admin">مدير عام (صلاحيات كاملة)</option>
-                    <option value="support">دعم فني (عمليات فقط)</option>
-                    <option value="content">مدير محتوى (تصنيفات ونماذج)</option>
-                </select>
+                <input type="password" class="form-control" id="password" placeholder="Password" value="password">
+                <label for="password">كلمة المرور</label>
             </div>
 
             <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-3 shadow-sm">
@@ -57,10 +45,32 @@
     <script src="../js/mock-data.js"></script>
     <script src="../js/main.js"></script>
     <script>
-        function handleLogin(e) {
+        async function handleLogin(e) {
             e.preventDefault();
-            const role = document.getElementById('roleSelect').value;
-            login(role);
+
+            const baseURL = 'https://dabbirly.com';
+            const loginForm = document.getElementById('loginForm');
+
+            const mobile = document.getElementById('mobile').value;
+            const password = document.getElementById('password').value;
+
+            const response = await fetch(`${baseURL}/api/dashboard/v1/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ mobile, password })
+            });
+
+            const data = await response.json();
+            response.ok ? alert('تم تسجيل الدخول بنجاح!') : alert(data.message || 'حدث خطأ أثناء تسجيل الدخول.');
+
+            const userUser = { name: data.admin.first_name + " " + data.admin.last_name, role: data.admin.role, mobile: data.admin.mobile, token: data.token };
+
+            console.log('userUser', userUser);
+            sessionStorage.setItem("db_user", JSON.stringify(userUser));
+            window.location.href = "index.html";
         }
     </script>
 </body>

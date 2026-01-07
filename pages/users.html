@@ -38,7 +38,6 @@
                                         <th data-i18n="th_contact">معلومات الاتصال</th>
                                         <th data-i18n="th_locations">المواقع</th>
                                         <th data-i18n="th_verification">التوثيق</th>
-                                        <th data-i18n="th_status">الحالة</th>
                                         <th data-i18n="th_join_date">تاريخ الانضمام</th>
                                         <th data-i18n="actions">خيارات</th>
                                     </tr>
@@ -57,49 +56,77 @@
     <script src="../js/mock-data.js"></script>
     <script src="../js/main.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", async () => {
             const tbody = document.getElementById("users-body");
-            mockApi.users.forEach(u => {
-                const verifiedBadge = u.is_verified
-                    ? '<span class="badge bg-success-subtle text-success border border-success-subtle"><i class="fas fa-check-circle"></i> موثق</span>'
-                    : '<span class="badge bg-secondary-subtle text-secondary">غير موثق</span>';
+            const baseURL = 'https://dabbirly.com';
 
-                let statusBadge = '<span class="badge bg-status-active">نشط</span>';
-                if (u.status !== 'active') statusBadge = '<span class="badge bg-status-blocked">محظور</span>';
+            const userSession = JSON.parse(sessionStorage.getItem("db_user"));
+            if (!userSession) return console.error("No user session found");
 
-                tbody.innerHTML += `
-                    <tr>
-                        <td><span class="text-muted">#${u.id}</span></td>
-                        <td>
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                                    <i class="fas fa-user text-secondary"></i>
-                                </div>
-                                <span class="fw-bold text-dark">${u.name}</span>
+            try {
+                const response = await fetch(`${baseURL}/api/dashboard/v1/get-users?next_cursor=`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${userSession.token}` // Corrected
+                    },
+                });
+
+                const data = await response.json(); // Parse JSON
+
+                if (!response.ok) {
+                    console.error("Failed to fetch users:", response.status, response.statusText);
+                    return;
+                }
+
+                const users = data.users || []; // Adjust if your API wraps users differently
+
+                tbody.innerHTML = ""; // Clear table before adding new rows
+                users.forEach(u => {
+                    const verifiedBadge = u.mobile_verified_at
+                        ? '<span class="badge bg-success-subtle text-success border border-success-subtle"><i class="fas fa-check-circle"></i> موثق</span>'
+                        : '<span class="badge bg-secondary-subtle text-secondary">غير موثق</span>';
+
+                    let statusBadge = `<span class="badge bg-status-active">${u.created_at}</span>`;
+
+                    tbody.innerHTML += `
+                <tr>
+                    <td><span class="text-muted">#${u.id}</span></td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                <i class="fas fa-user text-secondary"></i>
                             </div>
-                        </td>
-                        <td>
-                            <div class="small text-dark">${u.mobile}</div>
-                            <div class="small text-muted">${u.email}</div>
-                        </td>
-                        <td>
-                            <span class="badge bg-light text-dark border">${u.locations.length} مواقع</span>
-                        </td>
-                        <td>${verifiedBadge}</td>
-                        <td>${statusBadge}</td>
-                        <td dir="ltr" class="text-end small text-muted">${u.created_at.split(' ')[0]}</td>
-                        <td>
-                            <div class="dropdown">
-                                <button class="btn btn-sm btn-light border-0" data-bs-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="user-details.html?id=${u.id}">التفاصيل</a></li>
-                                    <li><a class="dropdown-item text-danger" href="#">حظر</a></li>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            });
+                            <span class="fw-bold text-dark">${u.first_name}</span>
+                            <span class="fw-bold text-dark">${u.last_name}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="small text-dark">${u.mobile}</div>
+                        <div class="small text-muted">${u.email}</div>
+                    </td>
+                    <td>
+                        <span class="badge bg-light text-dark border">${u.locations.length} مواقع</span>
+                    </td>
+                    <td>${verifiedBadge}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light border-0" data-bs-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="user-details.html?id=${u.id}">التفاصيل</a></li>
+                                <li><a class="dropdown-item text-danger" href="#">حظر</a></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            `;
+                });
+
+            } catch (error) {
+                console.error("Error fetching users:", error);
+            }
         });
     </script>
 </body>

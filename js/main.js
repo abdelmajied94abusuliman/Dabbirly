@@ -137,7 +137,6 @@ async function loadLayout() {
 
     try {
         const basePath = getBasePath();
-        console.log("Base Path:", basePath);
 
         // Load Sidebar
         const sidebarRes = await fetch(`${basePath}/layouts/sidebar.html`);
@@ -211,7 +210,7 @@ async function loadLayout() {
         }, 500); // Quick check then hide
 
     } catch (error) {
-        console.error("Layout loading failed:", error);
+        console.error("Layout loading failed: ", error);
     }
 }
 
@@ -236,6 +235,7 @@ const DICTIONARY = {
         "operations": "العمليات",
         "requests": "الطلبات",
         "cancelled_req": "الطلبات الملغاة",
+        "waiting_req": "الطلبات بدون عروض",
         "support": "الدعم الفني",
         "logs": "سجل النظام",
         "settings": "الإعدادات",
@@ -432,6 +432,7 @@ const DICTIONARY = {
         "operations": "Operations",
         "requests": "Requests",
         "cancelled_req": "Cancelled Requests",
+        "waiting_req": "Waiting Requests",
         "support": "Support Dashboard",
         "logs": "System Logs",
         "settings": "Settings",
