@@ -26,8 +26,10 @@
                 <div class="row align-items-center mb-4">
                     <div class="col-md-8">
                         <div class="d-flex align-items-center gap-3">
-                            <div class="bg-primary text-white rounded p-3">
-                                <i class="fas fa-store fa-2x"></i>
+                            <div id="provider-image"
+                                class="bg-primary text-white rounded p-3 d-flex align-items-center justify-content-center"
+                                style="width: 60px; height: 60px;">
+                                <i class="fas fa-store fa-2x" id="provider-icon"></i>
                             </div>
                             <div>
                                 <h3 class="fw-bold mb-0" id="biz-name">Loading...</h3>
@@ -42,6 +44,8 @@
                             <button class="btn btn-danger"><i class="fas fa-times me-2"></i> رفض</button>
                         </div>
                         <div id="active-actions" class="d-none">
+                            <button id="activate-btn" class="btn btn-success d-none" onclick="activateProvider()">تفعيل
+                                الحساب</button>
                             <button class="btn btn-outline-danger">إيقاف مؤقت للحساب</button>
                         </div>
                     </div>
@@ -74,7 +78,7 @@
                         <div class="card">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <span>المستندات</span>
-                                <span class="badge bg-secondary">2</span>
+                                <span id="document-count" class="badge bg-secondary">2</span>
                             </div>
                             <div class="list-group list-group-flush" id="docs-list">
                                 <!-- JS -->
@@ -142,21 +146,64 @@
     <script src="../js/mock-data.js"></script>
     <script src="../js/main.js"></script>
     <script>
+        const urlParams = new URLSearchParams(window.location.search);
         let currentId = null;
+        currentId = urlParams.get('id');
+        let baseURL = 'https://dabbirly.com';
+        let userSession = JSON.parse(sessionStorage.getItem("db_user"));
+
 
         document.addEventListener("DOMContentLoaded", () => {
-            currentId = parseInt(getUrlParam('id'));
-            const p = mockApi.providers.find(x => x.id === currentId);
+            getProviderById();
+        });
+
+        async function getProviderById() {
+            if (!currentId) return;
+
+            if (!userSession) {
+                console.error("No user session found");
+                return;
+            }
+
+            let data = null;
+
+            try {
+                const response = await fetch(
+                    `${baseURL}/api/dashboard/v1/provider/${currentId}`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'Authorization': `Bearer ${userSession.token}`
+                        },
+                    }
+                );
+
+                data = await response.json();
+                if (!response.ok) {
+                    console.error("Failed to fetch provider", data);
+                    return;
+                }
+            } catch (error) {
+                console.error("Request error:", error);
+                return;
+            }
+
+            // ✅ Use the real provider object
+            const p = data.provider;
             if (!p) return;
 
             // Header
-            document.getElementById("biz-name").innerText = p.business_name;
-            const cat = mockApi.categories.find(c => c.id === p.category_id);
-            document.getElementById("biz-cat").innerText = cat ? cat.name_ar : '-';
+            document.getElementById("biz-name").innerText = p.business_name || "-";
+            document.getElementById("biz-cat").innerText = p.category_name || "-"; // use category_name if available
 
-            // Actions
-            if (p.approval_status === "pending") document.getElementById("approval-actions").classList.remove("d-none");
-            else document.getElementById("active-actions").classList.remove("d-none");
+            // Actions (approval / active)
+            if (p.approval_status === "pending") {
+                document.getElementById("approval-actions").classList.remove("d-none");
+            } else {
+                document.getElementById("active-actions").classList.remove("d-none");
+            }
 
             // Status Labels
             document.getElementById("label-approved").innerHTML = p.approval_status === 'approved'
@@ -167,69 +214,138 @@
                 ? '<span class="badge bg-success">نشط</span>'
                 : '<span class="badge bg-secondary">متوقف</span>';
 
-            document.getElementById("sub-date").innerText = p.subscription_end_date || "غير مشترك";
+            document.getElementById("sub-date").innerText = p.subscription_ends_at
+                ? new Date(p.subscription_ends_at).toLocaleDateString('ar-EG')
+                : "غير مشترك";
 
-            // Docs
+            // Documents
+            const documentCount = document.getElementById("document-count");
+            documentCount.innerHTML = '';
+            documentCount.innerHTML += `<span id="document-count" class="badge bg-secondary" style="font-size: 14px; padding: 5px 5px;">${p.documents.length}</span>`;
+
             const docsList = document.getElementById("docs-list");
-            p.documents.forEach(d => {
-                docsList.innerHTML += `
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <i class="fas fa-file-pdf text-danger me-2"></i> ${d.type}
-                            <div class="small text-muted">${d.file}</div>
+            docsList.innerHTML = '';
+            if (p.documents.length > 0) {
+                p.documents.forEach((doc) => {
+                    docsList.innerHTML += `
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-file-pdf text-danger me-2"></i> ${doc.type}
+                                <div class="small text-muted">${doc.file}</div>
+                            </div>
+                            <span class="badge bg-light text-dark">-</span>
                         </div>
-                        <span class="badge bg-light text-dark">${d.status}</span>
-                    </div>
-                `;
-            });
+                    `;
+                })
+            }
 
-            // Services
+            // Services (sub_categories) - check if exists
             const subTags = document.getElementById("subcats-tags");
-            p.sub_categories.forEach(sid => {
-                const sub = mockApi.sub_categories.find(s => s.id === sid);
-                if (sub) subTags.innerHTML += `<span class="badge bg-primary-subtle text-primary border border-primary-subtle p-2">${sub.name_ar}</span>`;
-            });
+            subTags.innerHTML = '';
+            if (p.subcategories && Array.isArray(p.subcategories)) {
+                p.subcategories.forEach(s => {
+                    subTags.innerHTML += `<span class="badge bg-primary-subtle text-primary border border-primary-subtle p-2">${s.name}</span>`;
+                });
+            }
 
-            // Cities
+            // Cities / locations
             const cityTags = document.getElementById("cities-tags");
-            p.locations.forEach(cid => {
-                const city = mockApi.cities.find(c => c.id === cid);
-                if (city) cityTags.innerHTML += `<span class="badge bg-light text-dark border p-2">${city.name_ar}</span>`;
-            });
+            cityTags.innerHTML = '';
+            if (p.locations && Array.isArray(p.locations)) {
+                p.locations.forEach(loc => {
+                    cityTags.innerHTML += `<span class="badge bg-light text-dark border p-2">${loc.name_ar || loc.city_name || '-'}</span>`;
+                });
+            }
 
             // Agents
             const agentBody = document.getElementById("agents-body");
-            if (p.agents.length === 0) agentBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">لا يوجد موظفين</td></tr>';
-            p.agents.forEach(a => {
-                agentBody.innerHTML += `<tr><td>${a.name}</td><td>${a.role}</td><td>${a.mobile}</td></tr>`;
-            });
+            agentBody.innerHTML = '';
+            if (!p.sub_providers || p.sub_providers.length === 0) {
+                agentBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">لا يوجد موظفين</td></tr>';
+            } else {
+                p.sub_providers.forEach(a => {
+                    agentBody.innerHTML += `<tr><td>${a.name || a.first_name + ' ' + a.last_name}</td><td>${a.role || '-'}</td><td>${a.mobile || '-'}</td></tr>`;
+                });
+            }
+
+            // Set provider image
+            const providerImageDiv = document.getElementById("provider-image");
+            const providerIcon = document.getElementById("provider-icon");
+
+            if (p.image) {
+                // If provider has an image
+                providerImageDiv.innerHTML = `<img src="${p.image}" alt="Provider" class="rounded" style="width:60px; height:60px; object-fit:cover;">`;
+            } else {
+                // Keep default icon
+                providerImageDiv.innerHTML = `<i class="fas fa-store fa-2x text-white"></i>`;
+            }
+
 
             // Previous Works
             const workGrid = document.getElementById("works-grid");
-            if (p.previous_works.length === 0) workGrid.innerHTML = '<div class="col-12 text-center text-muted">لا توجد أعمال سابقة</div>';
-            p.previous_works.forEach(w => {
-                workGrid.innerHTML += `
-                    <div class="col-md-4">
-                        <div class="card h-100">
-                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 120px;">
-                                <i class="fas fa-image fa-2x text-muted"></i>
-                            </div>
-                            <div class="card-body p-2 text-center">
-                                <small>${w.title}</small>
-                            </div>
+            workGrid.innerHTML = '';
+            if (!p.previous_works || p.previous_works.length === 0) {
+                workGrid.innerHTML = '<div class="col-12 text-center text-muted">لا توجد أعمال سابقة</div>';
+            } else {
+                p.previous_works.forEach(w => {
+                    workGrid.innerHTML += `
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 120px;">
+                            <i class="fas fa-image fa-2x text-muted"></i>
+                        </div>
+                        <div class="card-body p-2 text-center">
+                            <small>${w.title}</small>
                         </div>
                     </div>
-                `;
-            });
-        });
+                </div>
+            `;
+                });
+            }
+            const activateBtn = document.getElementById("activate-btn");
+            if (p.is_active) {
+                activateBtn.classList.add("d-none");
+            } else {
+                activateBtn.classList.remove("d-none");
+            }
+        }
 
+
+        // Approve button
         function approve(id) {
             if (confirm("اعتماد الحساب وتفعيل الاشتراك؟")) {
                 alert("تم الاعتماد بنجاح");
-                // update logic simulated
                 location.reload();
             }
         }
+
+        async function activateProvider() {
+            if (!confirm("هل تريد تفعيل الحساب؟")) return;
+
+            try {
+                const response = await fetch(`${baseURL}/api/dashboard/v1/activate-provider/${currentId}`, {
+                    method: 'PATCH', // or PUT depending on your API
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${userSession.token}`
+                    },
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    alert("حدث خطأ أثناء التفعيل: " + (result.message || "Unknown error"));
+                    return;
+                }
+
+                alert("تم تفعيل الحساب بنجاح!");
+                location.reload();
+            } catch (err) {
+                console.error(err);
+                alert("حدث خطأ في الشبكة.");
+            }
+        };
     </script>
 </body>
 
