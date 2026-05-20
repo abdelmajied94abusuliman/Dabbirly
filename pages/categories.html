@@ -50,14 +50,16 @@
     <script src="../js/mock-data.js"></script>
     <script src="../js/main.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", async function () {
-            const tbody = document.getElementById("cat-body");
+        const baseURL = 'https://dabbirly.com';
+        const userSession = JSON.parse(sessionStorage.getItem("db_user"));
 
-            const userSession = JSON.parse(sessionStorage.getItem("db_user"));
+        document.addEventListener("DOMContentLoaded", () => {
             if (!userSession) return console.error("No user session found");
-            const baseURL = 'https://dabbirly.com';
+            fetchCategories();
+        });
 
-            let data = null;
+        async function fetchCategories() {
+            const tbody = document.getElementById("cat-body");
 
             try {
                 const response = await fetch(`${baseURL}/api/dashboard/v1/categories`, {
@@ -65,39 +67,65 @@
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                        'Authorization': `Bearer ${userSession.token}` // Corrected
+                        'Authorization': `Bearer ${userSession.token}`
                     },
                 });
 
-                data = await response.json();
+                const data = await response.json();
 
-                if (!response.ok) {
-                    console.error("Failed to fetch users:", response.status, response.statusText);
-                }
-            } catch (error) {
-                console.error("Error fetching users:", error);
-            }
+                if (!response.ok) throw new Error("Failed to fetch");
 
-            tbody.innerHTML = "";
-            data.data.forEach(cat => {
-                tbody.innerHTML += `
+                tbody.innerHTML = "";
+                data.data.forEach(cat => {
+                    tbody.innerHTML += `
                     <tr>
                         <td>${cat.id}</td>
                         <td>
                             <div class="bg-light rounded d-flex align-items-center justify-content-center border" style="width: 40px; height: 40px;">
-                                <img src="${cat.image}" style="width: 40px; height: 40px;"/>
+                                <img src="${cat.image}" style="width: 100%; height: 100%; object-fit: cover;"/>
                             </div>
                         </td>
                         <td class="fw-bold text-primary">${cat.type_ar}</td>
                         <td class="text-muted">${cat.type}</td>
                         <td>
                             <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i></button>
-                            <button class="btn btn-sm btn-link text-danger"><i class="fas fa-trash-alt"></i></button>
+                            <!-- Delete Button -->
+                            <button class="btn btn-sm btn-link text-danger" onclick="deleteCategory(${cat.id})">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
                         </td>
                     </tr>
                 `;
-            });
-        });
+                });
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        async function deleteCategory(id) {
+            if (!confirm("هل أنت متأكد من حذف هذا التصنيف؟")) return;
+
+            try {
+                const response = await fetch(`${baseURL}/api/dashboard/v1/category/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${userSession.token}`
+                    }
+                });
+
+                if (response.ok) {
+                    fetchCategories();
+                } else {
+                    const errorData = await response.json();
+                    alert("حدث خطأ أثناء الحذف: " + (errorData.message || "Unknown error"));
+                }
+            } catch (error) {
+                console.error("Delete Error:", error);
+                alert("فشل الاتصال بالخادم");
+            }
+        }
     </script>
 </body>
 

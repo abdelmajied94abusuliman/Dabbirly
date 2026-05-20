@@ -46,7 +46,8 @@
                         <div id="active-actions" class="d-none">
                             <button id="activate-btn" class="btn btn-success d-none" onclick="activateProvider()">تفعيل
                                 الحساب</button>
-                            <button class="btn btn-outline-danger">إيقاف مؤقت للحساب</button>
+                            <button id="deactivate-btn" class="btn btn-outline-danger"
+                                onclick="deactivateProvider()">إيقاف مؤقت للحساب</button>
                         </div>
                     </div>
                 </div>
@@ -93,6 +94,9 @@
                                 <ul class="nav nav-tabs card-header-tabs" role="tablist">
                                     <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab"
                                             href="#services">الخدمات</a></li>
+                                    <!-- New Tab Link -->
+                                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab"
+                                            href="#requests-tab">الطلبات</a></li>
                                     <li class="nav-item"><a class="nav-link" data-bs-toggle="tab"
                                             href="#agents">الموظفين (Agents)</a></li>
                                     <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#works">الأعمال
@@ -108,6 +112,38 @@
 
                                         <h6 class="text-primary mb-3">مناطق التغطية</h6>
                                         <div class="d-flex flex-wrap gap-2" id="cities-tags"></div>
+                                    </div>
+
+                                    <!-- Requests Tab -->
+                                    <div class="tab-pane fade" id="requests-tab">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h6 class="text-primary mb-0">طلبات الخدمة</h6>
+                                            <select id="request-filter" class="form-select form-select-sm w-auto"
+                                                onchange="filterRequests()">
+                                                <option value="all">كل الحالات</option>
+                                                <option value="waiting">لم يتم تقديم سعر</option>
+                                                <option value="submitted">تم التقديم</option>
+                                                <option value="interested">هناك اهتمام</option>
+                                                <option value="accepted">تمت الموافقة</option>
+                                                <option value="completed">مكتمل</option>
+                                            </select>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-hover align-middle">
+                                                <thead class="table-light">
+                                                    <tr style="font-size: 13px;">
+                                                        <th>رقم الطلب</th>
+                                                        <th>العميل</th>
+                                                        <th>الحالة</th>
+                                                        <th>السعر المقدم</th>
+                                                        <th>التاريخ</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="requests-body">
+                                                    <!-- Data injected here -->
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
 
                                     <!-- Agents Tab -->
@@ -151,7 +187,7 @@
         currentId = urlParams.get('id');
         let baseURL = 'https://dabbirly.com';
         let userSession = JSON.parse(sessionStorage.getItem("db_user"));
-
+        let allRequests = [];
 
         document.addEventListener("DOMContentLoaded", () => {
             getProviderById();
@@ -168,21 +204,34 @@
             let data = null;
 
             try {
-                const response = await fetch(
-                    `${baseURL}/api/dashboard/v1/provider/${currentId}`,
-                    {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'Authorization': `Bearer ${userSession.token}`
-                        },
-                    }
-                );
+                const response = await fetch(`${baseURL}/api/dashboard/v1/provider/${currentId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${userSession.token}`
+                    },
+                });
+
+                const requestsResponse = await fetch(`${baseURL}/api/dashboard/v1/provider/${currentId}/requests`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${userSession.token}`
+                    },
+                });
 
                 data = await response.json();
+                requestsData = await requestsResponse.json();
+
                 if (!response.ok) {
                     console.error("Failed to fetch provider", data);
+                    return;
+                }
+
+                if (!requestsResponse.ok) {
+                    console.error("Failed to fetch provider requests", requestsData);
                     return;
                 }
             } catch (error) {
@@ -193,6 +242,9 @@
             // ✅ Use the real provider object
             const p = data.provider;
             if (!p) return;
+
+            allRequests = requestsData.data;
+            renderRequests(allRequests);
 
             // Header
             document.getElementById("biz-name").innerText = p.business_name || "-";
@@ -205,14 +257,15 @@
                 document.getElementById("active-actions").classList.remove("d-none");
             }
 
-            // Status Labels
-            document.getElementById("label-approved").innerHTML = p.approval_status === 'approved'
-                ? '<span class="text-success"><i class="fas fa-check-circle"></i> معتمد</span>'
-                : '<span class="text-warning"><i class="fas fa-clock"></i> قيد المراجعة</span>';
-
-            document.getElementById("label-active").innerHTML = p.is_active
-                ? '<span class="badge bg-success">نشط</span>'
-                : '<span class="badge bg-secondary">متوقف</span>';
+            if (p.is_active === false && p.subscription_ends_at === null) {
+                document.getElementById("label-active").innerHTML = '<span class="badge bg-secondary">غير نشط</span>';
+            } else if (p.is_active === true && p.subscription_ends_at > new Date().toISOString()) {
+                document.getElementById("label-active").innerHTML = '<span class="badge bg-success">نشط</span>';
+            } else if (p.is_active === false && p.subscription_ends_at > new Date().toISOString()) {
+                document.getElementById("label-active").innerHTML = '<span class="badge bg-info">متوقف</span>';
+            } else if (p.subscription_ends_at <= new Date().toISOString()) {
+                document.getElementById("label-active").innerHTML = '<span class="badge bg-danger">نشط (اشتراك منتهي)</span>';
+            }
 
             document.getElementById("sub-date").innerText = p.subscription_ends_at
                 ? new Date(p.subscription_ends_at).toLocaleDateString('ar-EG')
@@ -228,13 +281,16 @@
             if (p.documents.length > 0) {
                 p.documents.forEach((doc) => {
                     docsList.innerHTML += `
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <i class="fas fa-file-pdf text-danger me-2"></i> ${doc.type}
-                                <div class="small text-muted">${doc.file}</div>
-                            </div>
-                            <span class="badge bg-light text-dark">-</span>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="${doc.file}" target="_blank" class="btn btn-sm btn-outline-primary">عرض</a>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <span>
+                                ${doc.type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                            </span>
+                            <i class="fas fa-file-pdf text-danger"></i>
                         </div>
+                    </div>
                     `;
                 })
             }
@@ -253,7 +309,7 @@
             cityTags.innerHTML = '';
             if (p.locations && Array.isArray(p.locations)) {
                 p.locations.forEach(loc => {
-                    cityTags.innerHTML += `<span class="badge bg-light text-dark border p-2">${loc.name_ar || loc.city_name || '-'}</span>`;
+                    cityTags.innerHTML += `<span class="badge bg-light text-dark border p-2">${loc.city || '-'}</span>`;
                 });
             }
 
@@ -303,13 +359,87 @@
                 });
             }
             const activateBtn = document.getElementById("activate-btn");
+            const deactivateBtn = document.getElementById("deactivate-btn");
+
             if (p.is_active) {
                 activateBtn.classList.add("d-none");
+                deactivateBtn.classList.remove("d-none");
             } else {
                 activateBtn.classList.remove("d-none");
+                deactivateBtn.classList.add("d-none");
+            }
+
+            // داخل وظيفة getProviderById(p)
+            const labelApproved = document.getElementById("label-approved");
+            const baseBadgeClass = "badge d-inline-flex align-items-center px-3 py-2 fw-bold shadow-sm rounded-pill";
+
+            if (p.subscription_ends_at === null) {
+                // الحالة: قيد المراجعة
+                labelApproved.innerHTML = `
+                <span class="${baseBadgeClass}" style="background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba;">
+                    <i class="fas fa-hourglass-half me-2 pulse-animation"></i> قيد المراجعة
+                </span>`;
+
+                document.getElementById("btn-activate-area").style.display = "block";
+                document.getElementById("active-actions-area").style.display = "none";
+
+            } else {
+                // الحالة: نشط ومعتمد
+                labelApproved.innerHTML = `
+                <span class="${baseBadgeClass}" style="background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;">
+                    <i class="fas fa-check-double me-2"></i> معتمد
+                </span>`;
+
+                document.getElementById("btn-activate-area").style.display = "none";
+                document.getElementById("active-actions-area").style.display = "block";
+
             }
         }
 
+        function renderRequests(requests) {
+            const reqBody = document.getElementById("requests-body");
+            reqBody.innerHTML = '';
+
+            if (requests.length === 0) {
+                reqBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">لا توجد طلبات متوافقة</td></tr>';
+                return;
+            }
+
+            requests.forEach(req => {
+                const statusBadge = getStatusBadge(req.status);
+                reqBody.innerHTML += `
+            <tr style="font-size: 14px;">
+                <td><a href="request-details.html?id=${req.id}" class="fw-bold text-decoration-none">#${req.id}</a></td>
+                <td>${req.user_name || 'عميل'}</td>
+                <td>${statusBadge}</td>
+                <td class="text-success fw-bold">${req.quoted_price ? req.quoted_price + ' د.أ' : '-'}</td>
+                <td class="text-muted small">${new Date(req.created_at).toLocaleDateString('ar-EG')}</td>
+            </tr>
+        `;
+            });
+        }
+
+        function filterRequests() {
+            const filterValue = document.getElementById("request-filter").value;
+            if (filterValue === "all") {
+                renderRequests(allRequests);
+            } else {
+                const filtered = allRequests.filter(r => r.status === filterValue);
+                renderRequests(filtered);
+            }
+        }
+
+        function getStatusBadge(status) {
+            switch (status) {
+                case 'waiting': return '<span class="badge bg-warning-subtle text-warning">لم يتم تقديم سعر</span>';
+                case 'pending': return '<span class="badge bg-warning-subtle text-warning">قيد الانتظار</span>';
+                case 'submitted': return '<span class="badge bg-info-subtle text-info">تم التقديم</span>';
+                case 'completed': return '<span class="badge bg-success-subtle text-success">مكتمل</span>';
+                case 'accepted': return '<span class="badge bg-success-subtle text-success">تم الموافقة على العرض</span>';
+                case 'interested': return '<span class="badge bg-success-subtle text-success">هناك اهتمام بالعرض</span>';
+                default: return `<span class="badge bg-light text-dark">${status}</span>`;
+            }
+        }
 
         // Approve button
         function approve(id) {
@@ -323,7 +453,7 @@
             if (!confirm("هل تريد تفعيل الحساب؟")) return;
 
             try {
-                const response = await fetch(`${baseURL}/api/dashboard/v1/activate-provider/${currentId}`, {
+                const response = await fetch(`${baseURL}/api/dashboard/v1/provider/${currentId}/activate`, {
                     method: 'PATCH', // or PUT depending on your API
                     headers: {
                         'Content-Type': 'application/json',
@@ -340,6 +470,34 @@
                 }
 
                 alert("تم تفعيل الحساب بنجاح!");
+                location.reload();
+            } catch (err) {
+                console.error(err);
+                alert("حدث خطأ في الشبكة.");
+            }
+        };
+
+        async function deactivateProvider() {
+            if (!confirm("هل تريد تعطيل الحساب؟")) return;
+
+            try {
+                const response = await fetch(`${baseURL}/api/dashboard/v1/provider/${currentId}/deactivate`, {
+                    method: 'PATCH', // or PUT depending on your API
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${userSession.token}`
+                    },
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    alert("حدث خطأ أثناء تعطيل الحساب: " + (result.message || "Unknown error"));
+                    return;
+                }
+
+                alert("تم تعطيل الحساب بنجاح!");
                 location.reload();
             } catch (err) {
                 console.error(err);

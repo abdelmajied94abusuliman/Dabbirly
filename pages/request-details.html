@@ -7,7 +7,6 @@
     <title>تفاصيل الطلب - دبرلي</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="../css/style.css">
 </head>
 
@@ -17,232 +16,232 @@
         <div id="content">
             <div id="header-container"></div>
             <div class="content-body">
-
-                <div class="d-flex justify-content-between mb-4">
-                    <a href="requests.html" class="text-decoration-none text-muted"><i
-                            class="fas fa-arrow-right me-1"></i> <span data-i18n="all_requests_link">كل
-                            الطلبات</span></a>
-                    <div>
-                        <button class="btn btn-outline-danger btn-sm" onclick="cancelRequest()"><i
-                                class="fas fa-times me-1"></i> <span data-i18n="cancel_request">إلغاء
-                                الطلب</span></button>
-                    </div>
-                </div>
-
-                <!-- Timeline -->
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <div class="timeline-steps" id="timeline">
-                            <div class="step" id="step-pending">
-                                <div class="icon"><i class="fas fa-clock"></i></div>
-                                <div class="small fw-bold" data-i18n="req_new">الطلب جديد</div>
-                            </div>
-                            <div class="step" id="step-offered">
-                                <div class="icon"><i class="fas fa-hand-holding-usd"></i></div>
-                                <div class="small fw-bold" data-i18n="req_offered">وصول عروض</div>
-                            </div>
-                            <div class="step" id="step-accepted">
-                                <div class="icon"><i class="fas fa-check"></i></div>
-                                <div class="small fw-bold" data-i18n="req_accepted">قبول عرض</div>
-                            </div>
-                            <div class="step" id="step-completed">
-                                <div class="icon"><i class="fas fa-flag-checkered"></i></div>
-                                <div class="small fw-bold" data-i18n="req_completed">إكمال الخدمة</div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold">تفاصيل الطلب <span id="display-id" class="text-primary"></span></h2>
+                    <a href="requests.html" class="btn btn-outline-secondary btn-sm">العودة للطلبات</a>
                 </div>
 
                 <div class="row g-4">
-                    <!-- Right: Info -->
-                    <div class="col-md-5">
-                        <div class="card h-100">
-                            <div class="card-header bg-white fw-bold" data-i18n="req_user_data">بيانات الطلب والعميل
+                    <!-- Right Column: Request Dynamic Data -->
+                    <div class="col-lg-8">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-white py-3 fw-bold">تفاصيل الخدمة المطلوبة</div>
+                            <div class="card-body p-0">
+                                <table class="table table-striped mb-0">
+                                    <tbody id="dynamic-fields-body">
+                                        <!-- Dynamic rows injected here -->
+                                    </tbody>
+                                </table>
                             </div>
+                        </div>
+
+                        <!-- Images Gallery -->
+                        <div class="card shadow-sm mt-4">
+                            <div class="card-header bg-white py-3 fw-bold">الصور المرفقة</div>
                             <div class="card-body">
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3"
-                                        style="width: 48px; height: 48px;">
-                                        <i class="fas fa-user"></i>
-                                    </div>
-                                    <div>
-                                        <h5 class="mb-0" id="u-name">...</h5>
-                                        <div class="small text-muted" id="u-mobile">...</div>
-                                    </div>
-                                </div>
-                                <hr>
-                                <h6 class="text-primary mb-3" data-i18n="service_details">تفاصيل الخدمة</h6>
-                                <div id="form-data-grid">
-                                    <!-- Key/Value Pairs -->
-                                </div>
+                                <div id="image-gallery" class="d-flex flex-wrap gap-2"></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Left: Offers -->
-                    <div class="col-md-7">
-                        <div class="card h-100">
-                            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                                <h6 class="mb-0 fw-bold"><span data-i18n="offers_title">العروض المقدمة</span> (<span
-                                        id="offers-count">0</span>)</h6>
-                            </div>
+                    <!-- Left Column: User, Category & Provider -->
+                    <div class="col-lg-4">
+                        <div class="card shadow-sm mb-4" id="subcat-info">
+                            <div class="card-header bg-white fw-bold">معلومات التصنيف</div>
+                            <div class="card-body" id="subcat-info-body">جاري التحميل...</div>
+                        </div>
+
+                        <!-- User Card -->
+                        <div class="card shadow-sm mb-4" id="user-card">
+                            <div class="card-header bg-white fw-bold">معلومات العميل</div>
+                            <div class="card-body" id="user-info">جاري التحميل...</div>
+                        </div>
+
+                        <!-- Offers (Providers who sent a price) -->
+                        <div class="card shadow-sm mb-4 border-success">
+                            <div class="card-header bg-success text-white fw-bold">العروض المستلمة</div>
                             <div class="card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle mb-0">
-                                        <thead class="bg-light">
-                                            <tr>
-                                                <th data-i18n="provider">المزود</th>
-                                                <th data-i18n="offer_price">السعر</th>
-                                                <th data-i18n="offer_notes">ملاحظات</th>
-                                                <th data-i18n="offer_action">الإجراء</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="offers-body"></tbody>
-                                    </table>
-                                </div>
+                                <ul class="list-group list-group-flush" id="offers-list">
+                                    <!-- Offers will be injected here -->
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Notified Providers (Providers who received the request) -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-white fw-bold">مزودو الخدمة الذين تلقوا الطلب</div>
+                            <div class="card-body p-0">
+                                <ul class="list-group list-group-flush" id="notified-providers-list">
+                                    <!-- Providers will be injected here -->
+                                </ul>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="../js/mock-data.js"></script>
     <script src="../js/main.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const rid = parseInt(getUrlParam('id')) || 2004; // Default to 2004 for demo if no ID
-            const req = mockApi.requests.find(r => r.id === rid);
+        const baseURL = 'https://dabbirly.com';
+        const userSession = JSON.parse(sessionStorage.getItem("db_user"));
 
-            if (!req) {
-                Swal.fire('خطأ', 'الطلب غير موجود', 'error').then(() => window.location.href = 'requests.html');
-                return;
-            }
+        document.addEventListener("DOMContentLoaded", async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const requestId = urlParams.get('id');
+            if (!requestId) return;
 
-            // User Info
-            const user = mockApi.users.find(u => u.id === req.user_id);
-            if (user) {
-                document.getElementById("u-name").innerText = user.name;
-                document.getElementById("u-mobile").innerText = user.mobile;
-            }
-
-            // Form Data
-            const grid = document.getElementById("form-data-grid");
-            const labels = {
-                "car_brand": "ماركة السيارة",
-                "car_model": "الموديل",
-                "year": "السنة",
-                "notes": "ملاحظات",
-                "location": "الموقع",
-                "car_type": "نوع السيارة",
-                "dropoff": "وجهة النقل"
-            };
-
-            for (const [key, val] of Object.entries(req.form_data)) {
-                let displayKey = labels[key] || key;
-                grid.innerHTML += `
-                    <div class="d-flex justify-content-between mb-2 pb-1 border-bottom border-light">
-                        <span class="text-muted small">${displayKey}</span>
-                        <span class="fw-bold text-dark">${val}</span>
-                    </div>
-                `;
-            }
-
-            // Timeline Viz
-            updateTimeline(req.status);
-
-            // Offers
-            const offers = mockApi.offer_request_provider.filter(o => o.request_id === rid);
-            document.getElementById("offers-count").innerText = offers.length;
-            const obody = document.getElementById("offers-body");
-
-            if (offers.length === 0) obody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">لا توجد عروض بعد</td></tr>';
-
-            offers.forEach(o => {
-                const prov = mockApi.providers.find(p => p.id === o.provider_id);
-                const isAccepted = o.is_accepted; // bool in strict schema
-
-                obody.innerHTML += `
-                    <tr class="${isAccepted ? 'bg-success-subtle' : ''}">
-                        <td>${prov.business_name}</td>
-                        <td class="fw-bold text-success">${o.price} ر.س</td>
-                        <td class="small text-muted">${o.notes}</td>
-                        <td>
-                            ${isAccepted
-                        ? '<span class="badge bg-success"><i class="fas fa-check"></i> تم القبول</span>'
-                        : `<button class="btn btn-sm btn-primary" onclick="acceptOffer(${o.id})">قبول</button>`}
-                        </td>
-                    </tr>
-                `;
-            });
+            document.getElementById('display-id').textContent = `#${requestId}`;
+            fetchFullData(requestId);
         });
 
-        function updateTimeline(status) {
-            const map = { 'pending': 0, 'offered': 1, 'accepted': 2, 'completed': 3, 'cancelled': -1 };
-            const lvl = map[status] || 0;
+        async function fetchFullData(id) {
+            const headers = {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${userSession.token}`
+            };
 
-            if (status === 'cancelled') {
-                document.getElementById('timeline').innerHTML = '<div class="alert alert-danger w-100 text-center">هذا الطلب ملغي</div>';
+            try {
+                const response = await fetch(`${baseURL}/api/dashboard/v1/request/${id}`, { headers });
+                const resJson = await response.json();
+
+                const offerRequest = resJson.offer_request;
+                const notifiedProviders = resJson.providers; // هذه للمزودين المتوفرين
+                const detailData = offerRequest.request_data.data;
+
+                // 1. عرض الحقول الديناميكية
+                const fieldsBody = document.getElementById('dynamic-fields-body');
+                fieldsBody.innerHTML = "";
+
+                Object.keys(detailData).forEach(key => {
+                    if (key === 'images' || key === 'location' || key === 'title') return;
+                    const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    const row = `<tr>
+                <td class="bg-light fw-bold" style="width: 40%">${formattedKey}</td>
+                <td>${detailData[key] || '---'}</td>
+            </tr>`;
+                    fieldsBody.innerHTML += row;
+                });
+
+                if (detailData.description) {
+                    fieldsBody.insertAdjacentHTML('afterbegin', `<tr><td class="bg-light fw-bold">Description</td><td>${detailData.description}</td></tr>`);
+                }
+                if (detailData.title) {
+                    fieldsBody.insertAdjacentHTML('afterbegin', `<tr><td class="bg-light fw-bold">Title</td><td>${detailData.title}</td></tr>`);
+                }
+
+                // 2. عرض الصور
+                const gallery = document.getElementById('image-gallery');
+                gallery.innerHTML = "";
+                if (detailData.images && detailData.images.length > 0) {
+                    detailData.images.forEach(img => {
+                        gallery.innerHTML += `<img src="${img}" class="rounded border m-1" style="width: 120px; height: 120px; object-fit: cover; cursor: pointer;" onclick="window.open('${img}')">`;
+                    });
+                } else {
+                    gallery.innerHTML = '<p class="text-muted small">لا توجد صور مرفقة</p>';
+                }
+
+                // 3. جلب بيانات المستخدم والتصنيف
+                fetchExtraDetails(offerRequest.user_id, offerRequest.request_data.sub_category_id, headers);
+
+                // 4. إرسال مصفوفة العروض المستلمة (تعديل المسار والتأكيد عليه)
+                renderOffers(offerRequest.providers);
+
+                // 5. عرض المزودين الذين وصلهم الطلب
+                renderNotifiedProviders(notifiedProviders);
+
+            } catch (error) {
+                console.error("Error loading request details:", error);
+            }
+        }
+
+        function renderOffers(providers) {
+            const list = document.getElementById('offers-list');
+            list.innerHTML = "";
+
+            if (!providers || providers.length === 0) {
+                list.innerHTML = '<li class="list-group-item text-muted text-center py-3">لا يوجد عروض حالياً</li>';
                 return;
             }
 
-            document.querySelectorAll('.timeline-steps .step').forEach((el, idx) => {
-                el.classList.remove('active', 'completed');
-                if (idx < lvl) el.classList.add('completed');
-                if (idx === lvl) el.classList.add('active');
+            providers.forEach(p => {
+                // استخراج السعر والحالة بناءً على الهيكل الجديد الراجع من الـ API
+                const price = p.quoted_price;
+                const providerId = p.provider_id;
+
+                list.innerHTML += `
+        <li class="list-group-item p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="d-flex align-items-center">
+                    <img src="${baseURL}/storage/${p.logo}" class="rounded me-2" style="width: 35px; height: 35px; margin-left:10px; object-fit: cover;">
+                    <span class="fw-bold small">${p.business_name}</span>
+                </div>
+                <span class="badge bg-success">${price} د.أ</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="provider-details.html?id=${providerId}" class="btn btn-sm btn-link p-0 text-decoration-none">الملف الشخصي</a>
+            </div>
+        </li>`;
             });
         }
 
-        function acceptOffer(oid) {
-            Swal.fire({
-                title: 'هل أنت متأكد؟',
-                text: "سيتم قبول هذا العرض وتعميد مقدم الخدمة!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#198754',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'نعم، قبول العرض',
-                cancelButtonText: 'إلغاء'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire(
-                        'تم القبول!',
-                        'تم تعميد مقدم الخدمة بنجاح.',
-                        'success'
-                    ).then(() => location.reload());
-                }
-            })
+        // دالة جلب بيانات العميل والتصنيف
+        async function fetchExtraDetails(userId, subCatId, headers) {
+            try {
+                const [userRes, subCatRes] = await Promise.all([
+                    fetch(`${baseURL}/api/dashboard/v1/user/${userId}`, { headers }),
+                    fetch(`${baseURL}/api/dashboard/v1/subcategory/${subCatId}`, { headers })
+                ]);
+
+                const userData = await userRes.json();
+                const subCatData = await subCatRes.json();
+
+                // تحديث واجهة المستخدم
+                document.getElementById('user-info').innerHTML = `
+            <div class="d-flex align-items-center mb-2">
+                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px; margin-left:10px">
+                    ${userData.data.first_name[0]}${userData.data.last_name[0]}
+                </div>
+                <div>
+                    <h6 class="mb-0">${userData.data.first_name} ${userData.data.last_name}</h6>
+                    <small class="text-muted">عميل رقم #${userId}</small>
+                </div>
+            </div>
+                <p class="mb-1 small"><i class="fas fa-phone me-2"></i> ${userData.data.mobile}</p>
+                <p class="mb-0 small"><i class="fas fa-envelope me-2"></i> ${userData.data.email || 'لا يوجد بريد'}</p>
+            `;
+
+                document.getElementById('subcat-info-body').innerHTML = `
+                <div class="badge bg-primary-subtle text-primary p-2">
+                    <i class="fas fa-tag me-1"></i> ${subCatData.data.name_ar}
+                </div>
+            `;
+            } catch (e) {
+                console.error("Error fetching extra details:", e);
+            }
         }
 
-        function cancelRequest() {
-            Swal.fire({
-                title: 'إلغاء الطلب؟',
-                text: "لن تتمكن من التراجع عن هذا الإجراء!",
-                icon: 'error',
-                showCancelButton: true,
-                confirmButtonColor: '#dc3545',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'نعم، إلغاء الطلب',
-                cancelButtonText: 'تراجع'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire(
-                        'تم الإلغاء!',
-                        'تم تغيير حالة الطلب إلى ملغي.',
-                        'success'
-                    ).then(() => window.location.href = 'requests.html');
-                }
-            })
-        }
-
-        // Helper for URL Params (if not in main.js)
-        function getUrlParam(name) {
-            const params = new URLSearchParams(window.location.search);
-            return params.get(name);
+        function renderNotifiedProviders(providers) {
+            const list = document.getElementById('notified-providers-list');
+            list.innerHTML = "";
+            if (!providers || providers.length === 0) {
+                list.innerHTML = '<li class="list-group-item text-muted text-center py-3">لم يتم العثور على مزودين</li>';
+                return;
+            }
+            providers.forEach(p => {
+                list.innerHTML += `
+            <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                <div class="d-flex align-items-center">
+                    <img src="${baseURL}/storage/${p.logo}" class="rounded me-2" style="width: 40px; height: 40px; margin-left:10px">
+                    <span class="fw-bold small">${p.business_name}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                <a href="provider-details.html?id=${p.id}" class="btn btn-sm btn-link p-0 text-decoration-none">الملف الشخصي</a>
+            </div>
+            </li>`;
+            });
         }
     </script>
 </body>

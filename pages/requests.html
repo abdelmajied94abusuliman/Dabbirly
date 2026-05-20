@@ -129,11 +129,13 @@
 
                 // Status Badge logic
                 let badge = `<span class="badge bg-secondary">${r.status}</span>`;
-                if (r.status === 'pending') badge = `<span class="badge bg-warning text-dark" data-i18n="pending">معلق</span>`;
-                if (r.status === 'offered') badge = `<span class="badge bg-info text-dark" data-i18n="active">جاري</span>`;
-                if (r.status === 'completed') badge = `<span class="badge bg-success" data-i18n="approved">مكتمل</span>`;
+                if (r.status === 'pending') badge = `<span class="badge bg-warning text-dark" data-i18n="pending">ينتظر</span>`;
+                if (r.status === 'offered') badge = `<span class="badge bg-info text-dark" data-i18n="offered">هناك عروض</span>`;
+                if (r.status === 'completed') badge = `<span class="badge bg-success" data-i18n="completed">مكتمل</span>`;
                 if (r.status === 'cancelled') badge = `<span class="badge bg-danger" data-i18n="cancelled">ملغي</span>`;
-                if (r.status === 'accepted') badge = `<span class="badge bg-primary">مقبول</span>`;
+                if (r.status === 'accepted') badge = `<span class="badge bg-primary" data-i18n="accepted">مقبول</span>`;
+                if (r.status === 'expired') badge = `<span class="badge bg-danger" data-i18n="expired">منتهي</span>`;
+                if (r.status === 'interested') badge = `<span class="badge bg-info" data-i18n="interested">مهتم</span>`;
 
                 tbody.innerHTML += `
                     <tr>
@@ -141,9 +143,9 @@
                         <td>${r.user ? r.user.first_name + '' + r.user.last_name : 'Unknown'}</td>
                         <td>${r.sub_category ? r.sub_category.name_ar : '---'}</td>
                         <td>${badge}</td>
-                        <td dir="ltr" class="small text-muted">${r.created_at}</td>
+                        <td class="small text-muted">${r.created_at?.split('T')[0]}</td>
                         <td>
-                            <a href="request-details.html?id=${r.id}" class="btn btn-sm btn-outline-primary" data-i18n="details">عرض</a>
+                            <a href="request-details.html?id=${r.id}" class="btn btn-sm btn-outline-primary" data-i18n="details">تفاصيل</a>
                         </td>
                     </tr>
                 `;

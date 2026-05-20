@@ -27,13 +27,13 @@
                     <div class="col-md-3">
                         <div class="card p-3 border-start border-4 border-primary">
                             <div class="text-muted small" data-i18n="active_providers">مزودين نشطين</div>
-                            <h3 class="mb-0 fw-bold">1</h3>
+                            <h3 class="mb-0 fw-bold " id="active-count-display">0</h3>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="card p-3 border-start border-4 border-warning">
                             <div class="text-muted small" data-i18n="pending_providers_stat">بانتظار الموافقة</div>
-                            <h3 class="mb-0 fw-bold">1</h3>
+                            <h3 class="mb-0 fw-bold" id="pending-count-display">0</h3>
                         </div>
                     </div>
                 </div>
@@ -64,7 +64,6 @@
                                     <th data-i18n="th_owner_name">اسم العميل</th>
                                     <th data-i18n="th_category">التصنيف</th>
                                     <th data-i18n="th_subscription">الاشتراك</th>
-                                    <th data-i18n="th_approval">حالة الاعتماد</th>
                                     <th data-i18n="th_activity">حالة النشاط</th>
                                     <th data-i18n="actions"></th>
                                 </tr>
@@ -94,6 +93,8 @@
 
         async function renderTable(filter) {
             const tbody = document.getElementById("prov-body");
+            const pendingDisplay = document.getElementById("pending-count-display"); // Get the display element
+            const activeDisplay = document.getElementById("active-count-display"); // Get the display element
             tbody.innerHTML = "";
 
             const baseURL = 'https://dabbirly.com';
@@ -132,13 +133,19 @@
                 return;
             }
 
-            data.providers.forEach(p => {
-                if (filter === 'pending' && p.approval_status !== 'pending') return;
-                if (filter === 'active' && !p.is_active) return;
+            const activeCount = data.providers.filter(p => p.is_active === true).length;
+            if (activeDisplay) {
+                activeDisplay.textContent = activeCount;
+            }
 
-                // Approval Badge
-                let appBadge = '<span class="badge bg-success-subtle text-success">معتمد</span>';
-                if (p.approval_status === 'pending') appBadge = '<span class="badge bg-warning-subtle text-warning-emphasis">قيد المراجعة</span>';
+            const pendingCount = data.providers.filter(p => p.is_active === false).length;
+            if (pendingDisplay) {
+                pendingDisplay.textContent = pendingCount;
+            }
+
+            data.providers.forEach(p => {
+                if (filter === 'pending' && p.is_active !== false) return;
+                if (filter === 'active' && p.is_active !== true) return;
 
                 // Activity Toggle
                 const toggle = p.is_active
@@ -151,8 +158,9 @@
                         <td class="fw-bold text-primary">${p.business_name}</td>
                         <td>${p.owner[0].first_name} ${p.owner[0].last_name}</td>
                         <td>${p.category.type_ar}</td>
-                        <td dir="ltr" class="small text-muted">${p.subscription_end_date || 'غير مشترك'}</td>
-                        <td>${appBadge}</td>
+                        <td class="small text-muted">
+                            ${p.subscription_ends_at ? p.subscription_ends_at.split('T')[0] : 'غير مشترك'}
+                        </td>
                         <td>${toggle}</td>
                         <td>
                             <a href="provider-details.html?id=${p.id}" class="btn btn-sm btn-outline-primary">إدارة</a>
