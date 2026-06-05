@@ -109,7 +109,7 @@
 
                 const offerRequest = resJson.offer_request;
                 const notifiedProviders = resJson.providers; // هذه للمزودين المتوفرين
-                const detailData = offerRequest.request_data.data;
+                const detailData = offerRequest.request_data;
 
                 // 1. عرض الحقول الديناميكية
                 const fieldsBody = document.getElementById('dynamic-fields-body');
@@ -144,7 +144,7 @@
                 }
 
                 // 3. جلب بيانات المستخدم والتصنيف
-                fetchExtraDetails(offerRequest.user_id, offerRequest.request_data.sub_category_id, headers);
+                fetchExtraDetails(offerRequest.user_id, offerRequest.sub_category_id, headers);
 
                 // 4. إرسال مصفوفة العروض المستلمة (تعديل المسار والتأكيد عليه)
                 renderOffers(offerRequest.providers);
